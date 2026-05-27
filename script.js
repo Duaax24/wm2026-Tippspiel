@@ -156,37 +156,7 @@ function renderSettings() {
   renderWeekManager();
 }
  
-function showRegister() {
-  document.getElementById('register-area').style.display = 'block';
-  document.getElementById('new-player-input').focus();
-}
-function hideRegister() {
-  document.getElementById('register-area').style.display = 'none';
-  document.getElementById('new-player-input').value = '';
-}
- 
-function registerPlayer() {
-  const input = document.getElementById('new-player-input');
-  const name = input.value.trim();
-  if (!name) { toast('Bitte einen Namen eingeben.'); return; }
-  if (state.players.includes(name)) {
-    toast(`"${name}" ist bereits registriert.`);
-    // still select them
-    hideRegister();
-    populatePlayerSelect();
-    document.getElementById('tipper-select').value = name;
-    loadTipperForm();
-    return;
-  }
-  state.players.push(name);
-  saveState();
-  hideRegister();
-  populatePlayerSelect();
-  document.getElementById('tipper-select').value = name;
-  loadTipperForm();
-  toast(`${name} registriert ✓`);
-}
- 
+
 function removePlayer(name) {
   if (!confirm(`"${name}" wirklich entfernen?`)) return;
   state.players = state.players.filter(p => p !== name);

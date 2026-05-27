@@ -32,7 +32,7 @@
           <select class="tipper-select" id="tipper-select" onchange="onTipperSelectChange()">
             <option value="">— Name wählen —</option>
           </select>
-          <button class="btn btn-outline" style="padding:8px 12px;font-size:13px;white-space:nowrap;" onclick="showRegister()">+ Neu</button>
+       
         </div>
       </div>
       <div>
@@ -40,15 +40,6 @@
         <select class="week-select" id="week-select-tip" onchange="loadTipperForm()"></select>
       </div>
     </div>
-    <div id="register-area" style="display:none;margin-bottom:16px;">
-      <div style="background:var(--dark-2);border:1px solid var(--dark-4);border-radius:10px;padding:16px;max-width:360px;">
-        <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;">Neuen Teilnehmer registrieren</p>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="new-player-input" class="player-input" style="padding-left:12px;" placeholder="Dein Name eingeben" onkeydown="if(event.key==='Enter')registerPlayer()">
-          <button class="btn btn-gold" style="padding:8px 16px;" onclick="registerPlayer()">Speichern</button>
-          <button class="btn btn-outline" style="padding:8px 12px;" onclick="hideRegister()">Abbrechen</button>
-        </div>
-      </div>
     </div>
     <div id="tipper-form-area">
       <div class="empty-hint">Bitte Namen und Spielwoche wählen.</div>
@@ -89,7 +80,6 @@
   <!-- === EINSTELLUNGEN === -->
   <div class="view" id="view-einstellungen">
     <div class="section-title">Einstellungen</div>
-    <p class="info-text">Teilnehmer registrieren sich selbst über den Tab "Tipps abgeben". Hier siehst du alle registrierten Teilnehmer und kannst sie bei Bedarf entfernen.</p>
     <div id="player-grid" style="margin-bottom:24px;"></div>
     <div class="btn-row" style="margin-bottom:32px;">
       <button class="btn btn-outline" onclick="resetAll()">Alles zurücksetzen</button>
