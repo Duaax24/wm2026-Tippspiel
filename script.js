@@ -5,7 +5,6 @@ const AHK_PLAYERS = [
   'Clara Bommersbach',
   'David Hoffmann',
   'Dominic Otto',
-  'Dr. Inga Laurušonė',
   'Duaa Fourah',
   'Edgars Ločmelis',
   'Egita Proveja',
@@ -16,6 +15,7 @@ const AHK_PLAYERS = [
   'Florian Schröder',
   'Ieva Mālmane',
   'Inese Reipa',
+  'Inga Laurušonė',
   'Jonathan Dormann',
   'Julian Seldenreich',
   'Juratė Vilimienė',
@@ -49,18 +49,18 @@ let state = {
   tips: {},     // tips[weekId][playerName] = [{home,away},...] per game
   results: {}   // results[weekId] = [{home,away},...] per game (real scores)
 };
-
+ 
 // ===== SUPABASE =====
 const SUPABASE_URL = 'https://pajzutzwwkskaxbpcjjz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhanp1dHp3d2tza2F4YnBjamp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTMzMjMsImV4cCI6MjA5NTM4OTMyM30.LzyPhoJkwA4y3DLxQZ00aOUq1LOJQFONgQHF3rZ3SFg';
-
+ 
 const sbHeaders = {
   'Content-Type': 'application/json',
   'apikey': SUPABASE_KEY,
   'Authorization': 'Bearer ' + SUPABASE_KEY,
   'Prefer': 'resolution=merge-duplicates'
 };
-
+ 
 async function sbGet(table, filter) {
   filter = filter || '';
   const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + filter, {
@@ -68,7 +68,7 @@ async function sbGet(table, filter) {
   });
   return res.json();
 }
-
+ 
 async function sbUpsert(table, data) {
   await fetch(SUPABASE_URL + '/rest/v1/' + table, {
     method: 'POST',
@@ -76,13 +76,13 @@ async function sbUpsert(table, data) {
     body: JSON.stringify(data)
   });
 }
-
+ 
 async function loadState() {
   state.players = [...AHK_PLAYERS];
   state.weeks = [];
   state.tips = {};
   state.results = {};
-
+ 
   try {
     const cfg = await sbGet('tippspiel_config', 'key=eq.state&select=value');
     if (cfg && cfg[0] && cfg[0].value) {
@@ -91,7 +91,7 @@ async function loadState() {
       if (saved.results) state.results = saved.results;
     }
   } catch(e) { console.warn('Config load failed', e); }
-
+ 
   try {
     const rows = await sbGet('tippspiel', 'select=player,week_id,tips');
     (rows || []).forEach(function(r) {
@@ -100,7 +100,7 @@ async function loadState() {
     });
   } catch(e) { console.warn('Tips load failed', e); }
 }
-
+ 
 async function saveState() {
   try {
     await sbUpsert('tippspiel_config', {
@@ -109,13 +109,13 @@ async function saveState() {
     });
   } catch(e) { console.warn('Config save failed', e); }
 }
-
+ 
 async function saveTipToDb(weekId, player, tips) {
   try {
     await sbUpsert('tippspiel', { player: player, week_id: weekId, tips: tips });
   } catch(e) { console.warn('Tips save failed', e); }
 }
-
+ 
 // ===== TABS =====
 function showTab(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -128,7 +128,7 @@ function showTab(name) {
   if (name === 'ergebnisse') renderResultTab();
   if (name === 'rangliste') renderRankingTab();
 }
-
+ 
 // ===== TOAST =====
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -136,7 +136,7 @@ function toast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
-
+ 
 // ===== SETTINGS =====
 function renderSettings() {
   const grid = document.getElementById('player-grid');
@@ -155,7 +155,7 @@ function renderSettings() {
   }
   renderWeekManager();
 }
-
+ 
 function showRegister() {
   document.getElementById('register-area').style.display = 'block';
   document.getElementById('new-player-input').focus();
@@ -164,7 +164,7 @@ function hideRegister() {
   document.getElementById('register-area').style.display = 'none';
   document.getElementById('new-player-input').value = '';
 }
-
+ 
 function registerPlayer() {
   const input = document.getElementById('new-player-input');
   const name = input.value.trim();
@@ -186,18 +186,18 @@ function registerPlayer() {
   loadTipperForm();
   toast(`${name} registriert ✓`);
 }
-
+ 
 function removePlayer(name) {
   if (!confirm(`"${name}" wirklich entfernen?`)) return;
   state.players = state.players.filter(p => p !== name);
   saveState();
   renderSettings();
 }
-
+ 
 function onTipperSelectChange() {
   loadTipperForm();
 }
-
+ 
 function resetAll() {
   if (!confirm('Wirklich ALLES zurücksetzen? Alle Tipps und Ergebnisse gehen verloren!')) return;
   state = { players: [...AHK_PLAYERS], weeks: [], tips: {}, results: {} };
@@ -205,7 +205,7 @@ function resetAll() {
   renderSettings();
   toast('Zurückgesetzt');
 }
-
+ 
 // ===== WEEK MANAGER =====
 function renderWeekManager() {
   const mgr = document.getElementById('week-manager');
@@ -242,7 +242,7 @@ function renderWeekManager() {
   }).join('');
   state.weeks.forEach((w, wi) => renderGamesInWeek(wi));
 }
-
+ 
 function renderGamesInWeek(wi) {
   const area = document.getElementById('games-'+wi);
   if (!area) return;
@@ -264,14 +264,14 @@ function renderGamesInWeek(wi) {
     </div>
   `).join('');
 }
-
+ 
 function addWeek() {
   const id = 'w' + Date.now();
   state.weeks.push({ id, name: `Woche ${state.weeks.length+1}`, deadline: '', games: [] });
   saveState();
   renderWeekManager();
 }
-
+ 
 function removeWeek(wi) {
   if (!confirm('Woche und alle zugehörigen Tipps löschen?')) return;
   const id = state.weeks[wi].id;
@@ -281,20 +281,20 @@ function removeWeek(wi) {
   saveState();
   renderWeekManager();
 }
-
+ 
 function addGame(wi) {
   if (!state.weeks[wi].games) state.weeks[wi].games = [];
   state.weeks[wi].games.push({ home: '', away: '', group: '' });
   saveState();
   renderGamesInWeek(wi);
 }
-
+ 
 function removeGame(wi, gi) {
   state.weeks[wi].games.splice(gi, 1);
   saveState();
   renderGamesInWeek(wi);
 }
-
+ 
 // ===== WEEK SELECTS =====
 function populateWeekSelects() {
   ['week-select-tip','week-select-result','week-select-overview'].forEach(id => {
@@ -313,14 +313,14 @@ function populateWeekSelects() {
     if (cur) rrank.value = cur;
   }
 }
-
+ 
 // ===== TIPS TAB =====
 function renderTipTab() {
   populateWeekSelects();
   populatePlayerSelect();
   loadTipperForm();
 }
-
+ 
 function populatePlayerSelect() {
   const sel = document.getElementById('tipper-select');
   if (!sel) return;
@@ -330,37 +330,37 @@ function populatePlayerSelect() {
     players.map(p => `<option value="${p}">${p}</option>`).join('');
   if (cur && players.includes(cur)) sel.value = cur;
 }
-
+ 
 function loadTipperForm() {
   const player = document.getElementById('tipper-select')?.value;
   const weekId = document.getElementById('week-select-tip')?.value;
   const area = document.getElementById('tipper-form-area');
   if (!area) return;
-
+ 
   if (!player || !weekId) {
     area.innerHTML = '<div class="empty-hint">Bitte Namen und Spielwoche wählen.</div>';
     return;
   }
-
+ 
   const week = state.weeks.find(w=>w.id===weekId);
   if (!week) { area.innerHTML = '<div class="empty-hint">Woche nicht gefunden.</div>'; return; }
-
+ 
   const isLocked = isWeekLocked(week);
   const existing = (state.tips[weekId] && state.tips[weekId][player]) || [];
-
+ 
   const games = week.games || [];
   if (games.length === 0) {
     area.innerHTML = '<div class="empty-hint">Noch keine Spiele in dieser Woche eingetragen.</div>';
     return;
   }
-
+ 
   let html = '';
   if (isLocked) {
     html += `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--red);margin-bottom:16px;">
       🔒 Deadline abgelaufen – Tipps gesperrt
     </div>`;
   }
-
+ 
   html += '<div class="games-list">';
   games.forEach((g, gi) => {
     const t = existing[gi] || {home:'',away:''};
@@ -368,7 +368,7 @@ function loadTipperForm() {
     html += `
       <div class="game-card ${isLocked?'locked':''}">
         <div class="game-meta">
-          <span class="game-group-badge">${g.group||'Gruppe ?'}</span>
+          <span class="game-group-badge">${g.group||'Gruppe ?'}</span>${g.datetime ? `<span class="game-date">${g.datetime} (OESZ)</span>` : ''}
         </div>
         <div class="game-team home">${g.home||'Team A'}</div>
         <div class="game-vs">
@@ -380,14 +380,14 @@ function loadTipperForm() {
       </div>`;
   });
   html += '</div>';
-
+ 
   if (!isLocked) {
     html += `<div class="btn-row"><button class="btn btn-gold" onclick="saveTips('${weekId}','${player}',${games.length})">Tipps speichern</button></div>`;
   }
-
+ 
   area.innerHTML = html;
 }
-
+ 
 async function saveTips(weekId, player, gameCount) {
   if (!state.tips[weekId]) state.tips[weekId] = {};
   const tips = [];
@@ -401,7 +401,7 @@ async function saveTips(weekId, player, gameCount) {
   await saveTipToDb(weekId, player, tips);
   toast(`Tipps von ${player} gespeichert ✓`);
 }
-
+ 
 function isWeekLocked(week) {
   // Use explicit deadline if set, otherwise auto: 23:59 day before week start
   if (week.deadline) return new Date() > new Date(week.deadline);
@@ -413,34 +413,33 @@ function isWeekLocked(week) {
   }
   return false;
 }
-
+ 
 // ===== RESULT TAB =====
 function renderResultTab() {
   populateWeekSelects();
   loadResultForm();
 }
-
+ 
 function loadResultForm() {
   const weekId = document.getElementById('week-select-result')?.value;
   const area = document.getElementById('result-form-area');
   if (!area) return;
   if (!weekId) { area.innerHTML = '<div class="empty-hint">Woche wählen.</div>'; return; }
-
+ 
   const week = state.weeks.find(w=>w.id===weekId);
   if (!week) return;
   const games = week.games || [];
   if (games.length === 0) { area.innerHTML = '<div class="empty-hint">Keine Spiele in dieser Woche.</div>'; return; }
-
+ 
   const existing = state.results[weekId] || [];
-
+ 
   let html = '<div class="games-list">';
   games.forEach((g, gi) => {
     const r = existing[gi] || {home:'',away:''};
     html += `
       <div class="game-card">
         <div class="game-meta">
-          <span class="game-group-badge">${g.group||'?'}</span>
-          <span class="game-date">Ergebnis</span>
+          <span class="game-group-badge">${g.group||'?'}</span>${g.datetime ? `<span class="game-date">${g.datetime} (OESZ)</span>` : ''}
         </div>
         <div class="game-team home">${g.home||'Team A'}</div>
         <div class="game-vs">
@@ -453,10 +452,10 @@ function loadResultForm() {
   });
   html += '</div>';
   html += `<div class="btn-row"><button class="btn btn-gold" onclick="saveResults('${weekId}',${games.length})">Ergebnisse speichern & Punkte berechnen</button></div>`;
-
+ 
   area.innerHTML = html;
 }
-
+ 
 async function saveResults(weekId, gameCount) {
   const results = [];
   for (let i = 0; i < gameCount; i++) {
@@ -469,19 +468,19 @@ async function saveResults(weekId, gameCount) {
   await saveState();
   toast('Ergebnisse gespeichert und Punkte berechnet ✓');
 }
-
+ 
 // ===== POINTS CALC =====
 function calcPoints(tip, result) {
   if (tip.home==='' || tip.away==='' || tip.home==null || tip.away==null) return null;
   if (result.home==null || result.away==null) return null;
-
+ 
   const th = parseInt(tip.home), ta = parseInt(tip.away);
   const rh = parseInt(result.home), ra = parseInt(result.away);
-
+ 
   let pts = 0;
   // Exact score: 5 pts
   if (th === rh && ta === ra) { pts = 5; return { pts, label: 'exact' }; }
-
+ 
   // Correct outcome: 3 pts
   const tipOut = th > ta ? 'H' : th < ta ? 'A' : 'D';
   const resOut = rh > ra ? 'H' : rh < ra ? 'A' : 'D';
@@ -493,7 +492,7 @@ function calcPoints(tip, result) {
   }
   return { pts: 0, label: 'wrong' };
 }
-
+ 
 function getPlayerTotalPoints(player, weekId) {
   let total = 0, exact = 0;
   const weeks = weekId === 'all' ? state.weeks : state.weeks.filter(w=>w.id===weekId);
@@ -510,30 +509,30 @@ function getPlayerTotalPoints(player, weekId) {
   });
   return { total, exact };
 }
-
+ 
 // ===== RANKING TAB =====
 function renderRankingTab() {
   populateWeekSelects();
   renderRanking();
   renderTipsOverview();
 }
-
+ 
 function renderRanking() {
   const weekId = document.getElementById('week-select-rank')?.value || 'all';
   const area = document.getElementById('ranking-area');
   if (!area) return;
-
+ 
   const players = state.players.filter(p=>p.trim()!=='');
   if (players.length === 0) {
     area.innerHTML = '<div class="empty-hint">Noch keine Spieler eingetragen.</div>';
     return;
   }
-
+ 
   const ranked = players.map(p => {
     const { total, exact } = getPlayerTotalPoints(p, weekId);
     return { name: p, total, exact };
   }).sort((a,b) => b.total - a.total || b.exact - a.exact);
-
+ 
   let html = '<table class="ranking-table"><thead><tr><th>Platz</th><th>Name</th><th style="text-align:right">Punkte</th><th style="text-align:right">Exakt</th></tr></thead><tbody>';
   ranked.forEach((r,i) => {
     html += `<tr class="rank-${i+1}">
@@ -544,7 +543,7 @@ function renderRanking() {
     </tr>`;
   });
   html += '</tbody></table>';
-
+ 
   // Points legend
   html += `<div style="background:var(--dark-2);border:1px solid var(--dark-4);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-muted);">
     <strong style="color:var(--text)">Punktesystem:</strong> &nbsp;
@@ -552,37 +551,37 @@ function renderRanking() {
     Richtiger Ausgang + ein korrektes Tor = <strong style="color:#1a3fa8">4 Punkte</strong> &nbsp;|&nbsp;
     Richtiger Ausgang = <strong style="color:#1a3fa8">3 Punkte</strong>
   </div>`;
-
+ 
   area.innerHTML = html;
 }
-
+ 
 function renderTipsOverview() {
   const weekId = document.getElementById('week-select-overview')?.value;
   const area = document.getElementById('tips-overview-area');
   if (!area) return;
   if (!weekId) { area.innerHTML = '<div class="empty-hint">Spielwoche wählen.</div>'; return; }
-
+ 
   const week = state.weeks.find(w=>w.id===weekId);
   if (!week) return;
-
+ 
   const games = week.games || [];
   const players = state.players.filter(p=>p.trim()!=='');
   const results = state.results[weekId] || [];
-
+ 
   if (players.length === 0) { area.innerHTML = '<div class="empty-hint">Keine Spieler.</div>'; return; }
-
+ 
   let html = '<div class="tips-player-grid">';
   players.forEach(player => {
     const tips = (state.tips[weekId] && state.tips[weekId][player]) || [];
     let weekPts = 0;
     let tipsHtml = '';
-
+ 
     games.forEach((g, gi) => {
       const t = tips[gi];
       const r = results[gi];
       let scoreLabel = '– : –';
       let cls = 'pending';
-
+ 
       if (t && (t.home !== '' && t.away !== '')) {
         scoreLabel = `${t.home} : ${t.away}`;
         if (r && r.home != null) {
@@ -595,13 +594,13 @@ function renderTipsOverview() {
           cls = 'pending';
         }
       }
-
+ 
       tipsHtml += `<div class="tip-row">
         <span class="tip-match">${g.home||'?'} – ${g.away||'?'}</span>
         <span class="tip-score ${cls}">${scoreLabel}</span>
       </div>`;
     });
-
+ 
     html += `<div class="tip-card">
       <div class="tip-card-header">
         ${player}
@@ -613,51 +612,190 @@ function renderTipsOverview() {
   html += '</div>';
   area.innerHTML = html;
 }
-
+ 
 // ===== INIT =====
 async function init() {
   // Show loading indicator
   document.getElementById('tipper-form-area').innerHTML = '<div class="empty-hint">⏳ Daten werden geladen…</div>';
-
+ 
   await loadState();
-
+ 
   // Add default weeks if DB is empty
   if (state.weeks.length === 0) {
     state.weeks.push({
-      id: 'w_gp1',
-      name: 'Woche 1 – Gruppenphase (11.–17. Juni)',
-      startDate: '2026-06-11',
+      id: "w_gp1",
+      name: "Spieltag 1 – Gruppenphase (11.–17. Juni)",
+      startDate: "2026-06-11",
+      deadline: "2026-06-11T22:00:00",
       games: [
-        { home: 'Mexiko', away: 'Südafrika', group: 'Gruppe A' },
-        { home: 'Südkorea', away: 'Tschechien', group: 'Gruppe A' },
-        { home: 'Kanada', away: 'Bosnien', group: 'Gruppe B' },
-        { home: 'Deutschland', away: 'Curaçao', group: 'Gruppe E' },
-        { home: 'Brasilien', away: 'Schottland', group: 'Gruppe C' },
-        { home: 'USA', away: 'Türkei', group: 'Gruppe D' },
-        { home: 'Frankreich', away: 'Irak', group: 'Gruppe I' },
-        { home: 'Spanien', away: 'Kap Verde', group: 'Gruppe H' },
+        { home: "Mexiko", away: "Südafrika", group: "Gruppe A", datetime: "11.06. 22:00 Uhr" },
+        { home: "Südkorea", away: "Tschechien", group: "Gruppe A", datetime: "12.06. 05:00 Uhr" },
+        { home: "Kanada", away: "Bosnien", group: "Gruppe B", datetime: "12.06. 22:00 Uhr" },
+        { home: "USA", away: "Paraguay", group: "Gruppe D", datetime: "13.06. 04:00 Uhr" },
+        { home: "Australien", away: "Türkei", group: "Gruppe D", datetime: "13.06. 07:00 Uhr" },
+        { home: "Katar", away: "Schweiz", group: "Gruppe B", datetime: "13.06. 22:00 Uhr" },
+        { home: "Brasilien", away: "Marokko", group: "Gruppe C", datetime: "14.06. 01:00 Uhr" },
+        { home: "Haiti", away: "Schottland", group: "Gruppe C", datetime: "14.06. 04:00 Uhr" },
+        { home: "Deutschland", away: "Curaçao", group: "Gruppe E", datetime: "14.06. 20:00 Uhr" },
+        { home: "Niederlande", away: "Japan", group: "Gruppe F", datetime: "14.06. 23:00 Uhr" },
+        { home: "Elfenbeinküste", away: "Ecuador", group: "Gruppe E", datetime: "15.06. 02:00 Uhr" },
+        { home: "Schweden", away: "Tunesien", group: "Gruppe F", datetime: "15.06. 05:00 Uhr" },
+        { home: "Spanien", away: "Kap Verde", group: "Gruppe H", datetime: "15.06. 19:00 Uhr" },
+        { home: "Belgien", away: "Ägypten", group: "Gruppe G", datetime: "15.06. 22:00 Uhr" },
+        { home: "Saudi-Arabien", away: "Uruguay", group: "Gruppe H", datetime: "16.06. 01:00 Uhr" },
+        { home: "Iran", away: "Neuseeland", group: "Gruppe G", datetime: "16.06. 04:00 Uhr" },
+        { home: "Frankreich", away: "Senegal", group: "Gruppe I", datetime: "16.06. 22:00 Uhr" },
+        { home: "Irak", away: "Norwegen", group: "Gruppe I", datetime: "17.06. 01:00 Uhr" },
+        { home: "Argentinien", away: "Algerien", group: "Gruppe J", datetime: "17.06. 04:00 Uhr" },
+        { home: "Österreich", away: "Jordanien", group: "Gruppe J", datetime: "17.06. 07:00 Uhr" },
+        { home: "Portugal", away: "DR Kongo", group: "Gruppe K", datetime: "17.06. 20:00 Uhr" },
+        { home: "England", away: "Kroatien", group: "Gruppe L", datetime: "17.06. 23:00 Uhr" },
+        { home: "Ghana", away: "Panama", group: "Gruppe L", datetime: "18.06. 02:00 Uhr" },
+        { home: "Usbekistan", away: "Kolumbien", group: "Gruppe K", datetime: "18.06. 05:00 Uhr" }
       ]
     });
     state.weeks.push({
-      id: 'w_gp2',
-      name: 'Woche 2 – Gruppenphase (18.–24. Juni)',
-      startDate: '2026-06-18',
+      id: "w_gp2",
+      name: "Spieltag 2 – Gruppenphase (18.–24. Juni)",
+      startDate: "2026-06-18",
+      deadline: "2026-06-18T19:00:00",
       games: [
-        { home: 'Mexiko', away: 'Tschechien', group: 'Gruppe A' },
-        { home: 'Südafrika', away: 'Südkorea', group: 'Gruppe A' },
-        { home: 'Deutschland', away: 'Elfenbeinküste', group: 'Gruppe E' },
-        { home: 'Argentinien', away: 'Algerien', group: 'Gruppe J' },
-        { home: 'Portugal', away: 'Usbekistan', group: 'Gruppe K' },
-        { home: 'Niederlande', away: 'Schweden', group: 'Gruppe F' },
-        { home: 'England', away: 'Panama', group: 'Gruppe L' },
-        { home: 'Belgien', away: 'Neuseeland', group: 'Gruppe G' },
+        { home: "Tschechien", away: "Südafrika", group: "Gruppe A", datetime: "18.06. 19:00 Uhr" },
+        { home: "Mexiko", away: "Südkorea", group: "Gruppe A", datetime: "19.06. 02:00 Uhr" },
+        { home: "Schweiz", away: "Bosnien", group: "Gruppe B", datetime: "18.06. 22:00 Uhr" },
+        { home: "Kanada", away: "Katar", group: "Gruppe B", datetime: "19.06. 01:00 Uhr" },
+        { home: "Schottland", away: "Marokko", group: "Gruppe C", datetime: "20.06. 01:00 Uhr" },
+        { home: "Brasilien", away: "Haiti", group: "Gruppe C", datetime: "20.06. 04:00 Uhr" },
+        { home: "Türkei", away: "Paraguay", group: "Gruppe D", datetime: "19.06. 07:00 Uhr" },
+        { home: "USA", away: "Australien", group: "Gruppe D", datetime: "19.06. 22:00 Uhr" },
+        { home: "Deutschland", away: "Elfenbeinküste", group: "Gruppe E", datetime: "20.06. 23:00 Uhr" },
+        { home: "Ecuador", away: "Curaçao", group: "Gruppe E", datetime: "21.06. 03:00 Uhr" },
+        { home: "Niederlande", away: "Schweden", group: "Gruppe F", datetime: "20.06. 20:00 Uhr" },
+        { home: "Tunesien", away: "Japan", group: "Gruppe F", datetime: "21.06. 07:00 Uhr" },
+        { home: "Belgien", away: "Iran", group: "Gruppe G", datetime: "21.06. 22:00 Uhr" },
+        { home: "Neuseeland", away: "Ägypten", group: "Gruppe G", datetime: "22.06. 04:00 Uhr" },
+        { home: "Spanien", away: "Saudi-Arabien", group: "Gruppe H", datetime: "21.06. 19:00 Uhr" },
+        { home: "Uruguay", away: "Kap Verde", group: "Gruppe H", datetime: "22.06. 01:00 Uhr" },
+        { home: "Frankreich", away: "Irak", group: "Gruppe I", datetime: "22.06. 23:00 Uhr (MEZ)" },
+        { home: "Norwegen", away: "Senegal", group: "Gruppe I", datetime: "23.06. 03:00 Uhr" },
+        { home: "Argentinien", away: "Österreich", group: "Gruppe J", datetime: "22.06. 20:00 Uhr" },
+        { home: "Jordanien", away: "Algerien", group: "Gruppe J", datetime: "23.06. 04:00 Uhr" },
+        { home: "Portugal", away: "Usbekistan", group: "Gruppe K", datetime: "23.06. 20:00 Uhr" },
+        { home: "Kolumbien", away: "DR Kongo", group: "Gruppe K", datetime: "24.06. 04:00 Uhr" },
+        { home: "England", away: "Ghana", group: "Gruppe L", datetime: "23.06. 23:00 Uhr" },
+        { home: "Panama", away: "Kroatien", group: "Gruppe L", datetime: "24.06. 02:00 Uhr" }
+      ]
+    });
+    state.weeks.push({
+      id: "w_gp3",
+      name: "Spieltag 3 – Gruppenphase (24.–28. Juni)",
+      startDate: "2026-06-24",
+      deadline: "2026-06-24T22:00:00",
+      games: [
+        { home: "Tschechien", away: "Mexiko", group: "Gruppe A", datetime: "25.06. 04:00 Uhr" },
+        { home: "Südafrika", away: "Südkorea", group: "Gruppe A", datetime: "25.06. 04:00 Uhr" },
+        { home: "Schweiz", away: "Kanada", group: "Gruppe B", datetime: "24.06. 22:00 Uhr" },
+        { home: "Bosnien", away: "Katar", group: "Gruppe B", datetime: "24.06. 22:00 Uhr" },
+        { home: "Schottland", away: "Brasilien", group: "Gruppe C", datetime: "25.06. 01:00 Uhr" },
+        { home: "Marokko", away: "Haiti", group: "Gruppe C", datetime: "25.06. 01:00 Uhr" },
+        { home: "Türkei", away: "USA", group: "Gruppe D", datetime: "26.06. 05:00 Uhr" },
+        { home: "Paraguay", away: "Australien", group: "Gruppe D", datetime: "26.06. 05:00 Uhr" },
+        { home: "Ecuador", away: "Deutschland", group: "Gruppe E", datetime: "25.06. 23:00 Uhr" },
+        { home: "Curaçao", away: "Elfenbeinküste", group: "Gruppe E", datetime: "25.06. 23:00 Uhr" },
+        { home: "Tunesien", away: "Niederlande", group: "Gruppe F", datetime: "26.06. 02:00 Uhr" },
+        { home: "Japan", away: "Schweden", group: "Gruppe F", datetime: "26.06. 02:00 Uhr" },
+        { home: "Neuseeland", away: "Belgien", group: "Gruppe G", datetime: "27.06. 06:00 Uhr" },
+        { home: "Ägypten", away: "Iran", group: "Gruppe G", datetime: "27.06. 06:00 Uhr" },
+        { home: "Uruguay", away: "Spanien", group: "Gruppe H", datetime: "27.06. 03:00 Uhr" },
+        { home: "Kap Verde", away: "Saudi-Arabien", group: "Gruppe H", datetime: "27.06. 03:00 Uhr" },
+        { home: "Norwegen", away: "Frankreich", group: "Gruppe I", datetime: "26.06. 22:00 Uhr" },
+        { home: "Senegal", away: "Irak", group: "Gruppe I", datetime: "26.06. 22:00 Uhr" },
+        { home: "Jordanien", away: "Argentinien", group: "Gruppe J", datetime: "28.06. 05:00 Uhr" },
+        { home: "Algerien", away: "Österreich", group: "Gruppe J", datetime: "28.06. 05:00 Uhr" },
+        { home: "Kolumbien", away: "Portugal", group: "Gruppe K", datetime: "28.06. 02:30 Uhr" },
+        { home: "DR Kongo", away: "Usbekistan", group: "Gruppe K", datetime: "28.06. 02:30 Uhr" },
+        { home: "Panama", away: "England", group: "Gruppe L", datetime: "28.06. 00:00 Uhr" },
+        { home: "Kroatien", away: "Ghana", group: "Gruppe L", datetime: "28.06. 00:00 Uhr" }
+      ]
+    });
+    state.weeks.push({
+      id: "w_sf",
+      name: "Sechzehntelfinale (28. Juni – 4. Juli)",
+      startDate: "2026-06-28",
+      deadline: "2026-06-28T22:00:00",
+      games: [
+        { home: "Zweiter A", away: "Zweiter B", group: "Sechzehntelfinale", datetime: "28.06. 22:00 Uhr" },
+        { home: "Erster C", away: "Zweiter F", group: "Sechzehntelfinale", datetime: "29.06. 20:00 Uhr" },
+        { home: "Erster E", away: "Bester Dritter A/B/C/D/F", group: "Sechzehntelfinale", datetime: "29.06. 23:30 Uhr" },
+        { home: "Erster F", away: "Zweiter C", group: "Sechzehntelfinale", datetime: "30.06. 03:00 Uhr" },
+        { home: "Zweiter E", away: "Zweiter I", group: "Sechzehntelfinale", datetime: "30.06. 20:00 Uhr" },
+        { home: "Erster I", away: "Bester Dritter C/D/F/G/H", group: "Sechzehntelfinale", datetime: "30.06. 00:00 Uhr" },
+        { home: "Erster A", away: "Bester Dritter C/E/F/H/I", group: "Sechzehntelfinale", datetime: "01.07. 03:00 Uhr" },
+        { home: "Erster L", away: "Bester Dritter E/H/I/J/K", group: "Sechzehntelfinale", datetime: "01.07. 19:00 Uhr" },
+        { home: "Erster G", away: "Bester Dritter A/E/H/I/J", group: "Sechzehntelfinale", datetime: "01.07. 23:00 Uhr" },
+        { home: "Erster D", away: "Bester Dritter B/E/F/I/J", group: "Sechzehntelfinale", datetime: "02.07. 03:00 Uhr" },
+        { home: "Erster H", away: "Zweiter J", group: "Sechzehntelfinale", datetime: "02.07. 22:00 Uhr" },
+        { home: "Zweiter K", away: "Zweiter L", group: "Sechzehntelfinale", datetime: "03.07. 02:00 Uhr" },
+        { home: "Erster B", away: "Bester Dritter E/F/G/I/J", group: "Sechzehntelfinale", datetime: "03.07. 06:00 Uhr" },
+        { home: "Zweiter D", away: "Zweiter G", group: "Sechzehntelfinale", datetime: "03.07. 21:00 Uhr" },
+        { home: "Erster J", away: "Zweiter H", group: "Sechzehntelfinale", datetime: "04.07. 01:00 Uhr" },
+        { home: "Erster K", away: "Bester Dritter D/E/I/J/L", group: "Sechzehntelfinale", datetime: "04.07. 04:30 Uhr" }
+      ]
+    });
+    state.weeks.push({
+      id: "w_af",
+      name: "Achtelfinale (4.–7. Juli)",
+      startDate: "2026-07-04",
+      deadline: "2026-07-04T20:00:00",
+      games: [
+        { home: "Sieger SF1", away: "Sieger SF3", group: "Achtelfinale", datetime: "04.07. 20:00 Uhr" },
+        { home: "Sieger SF2", away: "Sieger SF5", group: "Achtelfinale", datetime: "05.07. 00:00 Uhr" },
+        { home: "Sieger SF4", away: "Sieger SF6", group: "Achtelfinale", datetime: "05.07. 23:00 Uhr" },
+        { home: "Sieger SF7", away: "Sieger SF8", group: "Achtelfinale", datetime: "06.07. 03:00 Uhr" },
+        { home: "Sieger SF11", away: "Sieger SF12", group: "Achtelfinale", datetime: "06.07. 22:00 Uhr" },
+        { home: "Sieger SF9", away: "Sieger SF10", group: "Achtelfinale", datetime: "07.07. 03:00 Uhr" },
+        { home: "Sieger SF14", away: "Sieger SF16", group: "Achtelfinale", datetime: "07.07. 19:00 Uhr" },
+        { home: "Sieger SF13", away: "Sieger SF15", group: "Achtelfinale", datetime: "07.07. 23:00 Uhr" }
+      ]
+    });
+    state.weeks.push({
+      id: "w_vf",
+      name: "Viertelfinale (9.–12. Juli)",
+      startDate: "2026-07-09",
+      deadline: "2026-07-09T23:00:00",
+      games: [
+        { home: "Sieger AF1", away: "Sieger AF2", group: "Viertelfinale", datetime: "09.07. 23:00 Uhr" },
+        { home: "Sieger AF5", away: "Sieger AF6", group: "Viertelfinale", datetime: "10.07. 22:00 Uhr" },
+        { home: "Sieger AF3", away: "Sieger AF4", group: "Viertelfinale", datetime: "12.07. 00:00 Uhr" },
+        { home: "Sieger AF7", away: "Sieger AF8", group: "Viertelfinale", datetime: "12.07. 03:00 Uhr" }
+      ]
+    });
+    state.weeks.push({
+      id: "w_hf",
+      name: "Halbfinale (14.–15. Juli)",
+      startDate: "2026-07-14",
+      deadline: "2026-07-14T13:00:00",
+      games: [
+        { home: "Sieger VF1", away: "Sieger VF2", group: "Halbfinale", datetime: "14.07. 13:00 Uhr" },
+        { home: "Sieger VF3", away: "Sieger VF4", group: "Halbfinale", datetime: "15.07. 22:00 Uhr" }
+      ]
+    });
+    state.weeks.push({
+      id: "w_finale",
+      name: "Finale & Platz 3 (18.–19. Juli)",
+      startDate: "2026-07-18",
+      deadline: "2026-07-18T22:00:00",
+      games: [
+        { home: "Verlierer HF1", away: "Verlierer HF2", group: "Spiel um Platz 3", datetime: "18.07. 22:00 Uhr" },
+        { home: "Sieger HF1", away: "Sieger HF2", group: "🏆 Finale", datetime: "19.07. 22:00 Uhr" }
       ]
     });
     await saveState();
   }
-
+ 
   renderSettings();
   renderTipTab();
 }
-
+ 
 init();
+ 
