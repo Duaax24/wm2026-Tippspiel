@@ -1,0 +1,398 @@
+:root {
+    --gold: #B8860B;
+    --gold-light: #DAA520;
+    --dark: #ffffff;
+    --dark-2: #f5f7fa;
+    --dark-3: #eaecf0;
+    --dark-4: #d0d5de;
+    --text: #1a1f2e;
+    --text-muted: #5a6478;
+    --green: #16a34a;
+    --red: #dc2626;
+    --blue: #1a3fa8;
+    --royal: #1a3fa8;
+    --border: rgba(26,63,168,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #ffffff;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* === HEADER === */
+  header {
+    background: #1a3fa8;
+    border-bottom: none;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .logo span { color: rgba(255,255,255,0.7); }
+  .tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .tab {
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    transition: all 0.15s;
+  }
+  .tab:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .tab.active { background: #fff; color: #1a3fa8; }
+
+  /* === MAIN === */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px;
+  }
+
+  /* === VIEWS === */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* === SECTION TITLE === */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: #1a3fa8;
+    margin-bottom: 20px;
+  }
+
+  /* === PLAYER SETUP === */
+  .player-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .player-input-wrap {
+    position: relative;
+  }
+  .player-num {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    width: 18px;
+    text-align: center;
+  }
+  .player-input {
+    width: 100%;
+    background: var(--dark-3);
+    border: 1px solid var(--dark-4);
+    border-radius: 8px;
+    padding: 10px 12px 10px 32px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    transition: border-color 0.15s;
+  }
+  .player-input:focus { outline: none; border-color: var(--gold); }
+  .player-input::placeholder { color: var(--text-muted); }
+
+  /* === WEEK SELECTOR === */
+  .week-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .week-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: var(--gold);
+  }
+  .week-select {
+    background: var(--dark-3);
+    border: 1px solid var(--dark-4);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .week-select:focus { outline: none; border-color: var(--gold); }
+
+  /* === TIPPER SELECT === */
+  .tipper-bar {
+    margin-bottom: 20px;
+  }
+  .tipper-select {
+    background: var(--dark-3);
+    border: 1px solid var(--dark-4);
+    border-radius: 8px;
+    padding: 10px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 300px;
+  }
+  .tipper-select:focus { outline: none; border-color: var(--gold); }
+
+  /* === GAME CARD === */
+  .games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .game-card {
+    background: var(--dark-2);
+    border: 1px solid var(--dark-4);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+  }
+  .game-team {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .game-team.home { text-align: right; }
+  .game-team.away { text-align: left; }
+  .game-vs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .score-input {
+    width: 42px;
+    background: #fff;
+    border: 1px solid var(--dark-4);
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: var(--text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    text-align: center;
+    transition: border-color 0.15s;
+  }
+  .score-input:focus { outline: none; border-color: #1a3fa8; }
+  .score-colon {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--text-muted);
+  }
+  .game-meta {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .game-group-badge {
+    font-size: 11px;
+    background: var(--dark-4);
+    color: var(--text-muted);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .game-date {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .game-card.locked {
+    opacity: 0.6;
+  }
+
+  /* === BUTTONS === */
+  .btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-gold {
+    background: #1a3fa8;
+    color: #fff;
+  }
+  .btn-gold:hover { background: #2550c8; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--dark-4);
+    color: var(--text-muted);
+  }
+  .btn-outline:hover { border-color: #1a3fa8; color: #1a3fa8; }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* === RANGLISTE === */
+  .ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+  }
+  .ranking-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--dark-4);
+  }
+  .ranking-table td {
+    padding: 12px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--dark-3);
+    vertical-align: middle;
+  }
+  .rank-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--text-muted);
+    width: 32px;
+  }
+  .rank-1 .rank-num { color: #B8860B; }
+  .rank-2 .rank-num { color: #888; }
+  .rank-3 .rank-num { color: #cd7f32; }
+  .rank-name { font-weight: 600; }
+  .rank-pts {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: #1a3fa8;
+    text-align: right;
+  }
+  .rank-exact { font-size: 12px; color: var(--text-muted); text-align: right; }
+
+  /* === ERGEBNISSE ADMIN === */
+  .admin-note {
+    background: rgba(212,175,55,0.07);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  /* === TIPPS ANSICHT === */
+  .tips-player-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .tip-card {
+    background: var(--dark-2);
+    border: 1px solid var(--dark-4);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .tip-card-header {
+    background: #1a3fa8;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tip-card-pts {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    color: #fff;
+  }
+  .tip-row {
+    padding: 7px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    border-bottom: 1px solid var(--dark-3);
+  }
+  .tip-row:last-child { border-bottom: none; }
+  .tip-match { color: var(--text-muted); flex: 1; }
+  .tip-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    min-width: 36px;
+    text-align: right;
+  }
+  .tip-score.correct { color: var(--green); }
+  .tip-score.partial { color: var(--gold); }
+  .tip-score.wrong { color: var(--red); }
+  .tip-score.pending { color: var(--text-muted); }
+
+  /* === TOAST === */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--green);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* === STATUS BADGE === */
+  .status-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .status-open { background: rgba(34,197,94,0.15); color: var(--green); }
+  .status-tipped { background: rgba(212,175,55,0.15); color: var(--gold); }
+  .status-missing { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  hr { border: none; border-top: 1px solid var(--dark-4); margin: 20px 0; }
+
+  /* === INFO TEXT === */
+  .info-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+
+  .empty-hint {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }

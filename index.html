@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WM 2026 Tippspiel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">WM <span>2026</span> Tippspiel</div>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('tipps')">Tipps abgeben</button>
+    <button class="tab" onclick="showTab('ergebnisse')">Ergebnisse</button>
+    <button class="tab" onclick="showTab('rangliste')">Rangliste</button>
+    <button class="tab" onclick="showTab('einstellungen')">Einstellungen</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- === TIPPS === -->
+  <div class="view active" id="view-tipps">
+    <div class="section-title">Tipps Abgeben</div>
+    <div class="info-text">Wähle deinen Namen und tippe alle Spiele der aktuellen Woche. Deine Tipps sind für andere nicht sichtbar, bis die Deadline abläuft.</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end;">
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Dein Name</label>
+        <div style="display:flex;gap:6px;">
+          <select class="tipper-select" id="tipper-select" onchange="onTipperSelectChange()">
+            <option value="">— Name wählen —</option>
+          </select>
+          <button class="btn btn-outline" style="padding:8px 12px;font-size:13px;white-space:nowrap;" onclick="showRegister()">+ Neu</button>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Spielwoche</label>
+        <select class="week-select" id="week-select-tip" onchange="loadTipperForm()"></select>
+      </div>
+    </div>
+    <div id="register-area" style="display:none;margin-bottom:16px;">
+      <div style="background:var(--dark-2);border:1px solid var(--dark-4);border-radius:10px;padding:16px;max-width:360px;">
+        <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;">Neuen Teilnehmer registrieren</p>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="new-player-input" class="player-input" style="padding-left:12px;" placeholder="Dein Name eingeben" onkeydown="if(event.key==='Enter')registerPlayer()">
+          <button class="btn btn-gold" style="padding:8px 16px;" onclick="registerPlayer()">Speichern</button>
+          <button class="btn btn-outline" style="padding:8px 12px;" onclick="hideRegister()">Abbrechen</button>
+        </div>
+      </div>
+    </div>
+    <div id="tipper-form-area">
+      <div class="empty-hint">Bitte Namen und Spielwoche wählen.</div>
+    </div>
+  </div>
+
+  <!-- === ERGEBNISSE === -->
+  <div class="view" id="view-ergebnisse">
+    <div class="section-title">Ergebnisse Eintragen</div>
+    <div class="admin-note">Hier trägst du nach den Spielen die echten Ergebnisse ein. Punkte werden automatisch für alle Tipper berechnet.</div>
+    <div style="margin-bottom:20px;">
+      <select class="week-select" id="week-select-result" onchange="loadResultForm()">
+      </select>
+    </div>
+    <div id="result-form-area">
+      <div class="empty-hint">Spielwoche wählen.</div>
+    </div>
+  </div>
+
+  <!-- === RANGLISTE === -->
+  <div class="view" id="view-rangliste">
+    <div class="section-title">Rangliste</div>
+    <div style="margin-bottom:20px;">
+      <select class="week-select" id="week-select-rank" onchange="renderRanking()">
+        <option value="all">Gesamt</option>
+      </select>
+    </div>
+    <div id="ranking-area"></div>
+    <hr>
+    <div class="section-title" style="font-size:20px;margin-top:0;">Tipps Übersicht</div>
+    <div style="margin-bottom:16px;">
+      <select class="week-select" id="week-select-overview" onchange="renderTipsOverview()">
+      </select>
+    </div>
+    <div id="tips-overview-area"></div>
+  </div>
+
+  <!-- === EINSTELLUNGEN === -->
+  <div class="view" id="view-einstellungen">
+    <div class="section-title">Einstellungen</div>
+    <p class="info-text">Teilnehmer registrieren sich selbst über den Tab "Tipps abgeben". Hier siehst du alle registrierten Teilnehmer und kannst sie bei Bedarf entfernen.</p>
+    <div id="player-grid" style="margin-bottom:24px;"></div>
+    <div class="btn-row" style="margin-bottom:32px;">
+      <button class="btn btn-outline" onclick="resetAll()">Alles zurücksetzen</button>
+    </div>
+    <hr>
+    <div class="section-title" style="font-size:20px;margin-top:0;">Spielwochen verwalten</div>
+    <p class="info-text">Füge Spielwochen hinzu und trage die Spiele ein. Jede Woche hat einen Deadline-Datum (danach sind keine Tipps mehr möglich).</p>
+    <div id="week-manager"></div>
+    <button class="btn btn-gold" onclick="addWeek()" style="margin-top:16px;">+ Woche hinzufügen</button>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
