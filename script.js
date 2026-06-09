@@ -721,3 +721,17 @@ async function init() {
 }
 
 init();
+let lastScroll = 0;
+
+window.addEventListener("scroll", () => {
+  const header = document.querySelector("header");
+  const current = window.pageYOffset;
+
+  if(current > lastScroll && current > 100){
+    header.classList.add("hide");
+  } else {
+    header.classList.remove("hide");
+  }
+
+  lastScroll = current;
+});
