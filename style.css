@@ -9,8 +9,8 @@
   --text-muted: #5a6478;
   --green: #16a34a;
   --red: #dc2626;
-  --blue: #1a3fa8;
-  --royal: #1a3fa8;
+  --blue: #003366;
+  --royal: #003366;
   --border: rgba(26,63,168,0.15);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,7 +23,7 @@ body {
 
 /* === HEADER === */
 header {
-  background: #1a3fa8;
+  background: #003366;
   border-bottom: none;
   padding: 0 24px;
   display: flex;
@@ -57,7 +57,7 @@ header {
   transition: all 0.15s;
 }
 .tab:hover { background: rgba(255,255,255,0.15); color: #fff; }
-.tab.active { background: #fff; color: #1a3fa8; }
+.tab.active { background: #fff; color: #003366; }
 
 /* === MAIN === */
 .main {
@@ -75,7 +75,7 @@ header {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 28px;
   letter-spacing: 2px;
-  color: #1a3fa8;
+  color: #003366;
   margin-bottom: 20px;
 }
 
@@ -198,7 +198,7 @@ header {
   text-align: center;
   transition: border-color 0.15s;
 }
-.score-input:focus { outline: none; border-color: #1a3fa8; }
+.score-input:focus { outline: none; border-color: #003366; }
 .score-colon {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 18px;
@@ -238,16 +238,16 @@ header {
   transition: all 0.15s;
 }
 .btn-gold {
-  background: #1a3fa8;
+  background: #003366;
   color: #fff;
 }
-.btn-gold:hover { background: #2550c8; }
+.btn-gold:hover { background: #1a4f99; }
 .btn-outline {
   background: transparent;
   border: 1px solid var(--dark-4);
   color: var(--text-muted);
 }
-.btn-outline:hover { border-color: #1a3fa8; color: #1a3fa8; }
+.btn-outline:hover { border-color: #003366; color: #003366; }
 .btn-row {
   display: flex;
   gap: 10px;
@@ -289,7 +289,7 @@ header {
 .rank-pts {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
-  color: #1a3fa8;
+  color: #003366;
   text-align: right;
 }
 .rank-exact { font-size: 12px; color: var(--text-muted); text-align: right; }
@@ -319,7 +319,7 @@ header {
   overflow: hidden;
 }
 .tip-card-header {
-  background: #1a3fa8;
+  background: #003366;
   padding: 8px 14px;
   font-size: 12px;
   font-weight: 600;
