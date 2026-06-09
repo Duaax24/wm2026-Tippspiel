@@ -193,7 +193,7 @@ async function saveTipToDb(weekId, player, tips) {
 }
 
 // ===== TABS =====
-const ADMIN_PASSWORD = 'TallinnPraktikant2026WM!';
+const ADMIN_PASSWORD = 'TP!';
 let adminUnlocked = false;
 
 function showTab(name) {
