@@ -731,7 +731,7 @@ window.addEventListener("scroll", () => {
     header.classList.add("hide");
   } else {
     header.classList.remove("hide");
-  }
+  }   
 
   lastScroll = current;
 });
