@@ -12,6 +12,7 @@ const AHK_PLAYERS = [
   'Eugenijus Vaitekūnas',
   'Eve Vendelin',
   'Felix Doerfel',
+  'Florian Schröder',
   'Ieva Mālmane',
   'Inese Reipa',
   'Inga Laurušonė',
