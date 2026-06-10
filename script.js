@@ -123,11 +123,36 @@ async function sbGet(table, filter) {
 }
 
 async function sbUpsert(table, data) {
-  await fetch(SUPABASE_URL + '/rest/v1/' + table, {
-    method: 'POST',
-    headers: sbHeaders,
-    body: JSON.stringify(data)
-  });
+
+  let conflict = '';
+
+  if (table === 'tippspiel') {
+    conflict = '?on_conflict=player,week_id';
+  }
+
+  if (table === 'tippspiel_config') {
+    conflict = '?on_conflict=key';
+  }
+
+  const res = await fetch(
+    SUPABASE_URL + '/rest/v1/' + table + conflict,
+    {
+      method: 'POST',
+      headers: {
+        ...sbHeaders,
+        Prefer: 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(data)
+    }
+  );
+
+  if (!res.ok) {
+    console.error(
+      'Supabase Error:',
+      res.status,
+      await res.text()
+    );
+  }
 }
 
 // ===== AUTO-REFRESH =====
