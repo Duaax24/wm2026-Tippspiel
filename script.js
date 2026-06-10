@@ -57,7 +57,7 @@ const OFFICE_MAP = {
   "Eugenijus Vaitekūnas": "LT",
   "Eve Vendelin": "EE",
   "Felix Doerfel": "LT",
-  "Florian Schröder": null,
+  "Florian Schröder": "LT",
   "Ieva Mālmane": "LV",
   "Inese Reipa": "LV",
   "Inga Laurušonė": "LT",
