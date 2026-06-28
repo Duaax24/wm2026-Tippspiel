@@ -126,36 +126,11 @@ async function sbGet(table, filter) {
 }
 
 async function sbUpsert(table, data) {
-
-  let conflict = '';
-
-  if (table === 'tippspiel') {
-    conflict = '?on_conflict=player,week_id';
-  }
-
-  if (table === 'tippspiel_config') {
-    conflict = '?on_conflict=key';
-  }
-
-  const res = await fetch(
-    SUPABASE_URL + '/rest/v1/' + table + conflict,
-    {
-      method: 'POST',
-      headers: {
-        ...sbHeaders,
-        Prefer: 'resolution=merge-duplicates'
-      },
-      body: JSON.stringify(data)
-    }
-  );
-
-  if (!res.ok) {
-    console.error(
-      'Supabase Error:',
-      res.status,
-      await res.text()
-    );
-  }
+  await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: sbHeaders,
+    body: JSON.stringify(data)
+  });
 }
 
 // ===== AUTO-REFRESH =====
@@ -562,17 +537,29 @@ async function saveResults(weekId, gameCount) {
 }
 
 // ===== POINTS CALC =====
-function calcPoints(tip, result) {
+// Feste Punktwerte je Runde (keine Formel) – Gruppenphase bleibt 5/4/3.
+const ROUND_POINTS = {
+  w_sf:     { exact: 10, partial4: 7,  partial3: 5 },  // Sechzehntelfinale
+  w_af:     { exact: 18, partial4: 12, partial3: 8 },  // Achtelfinale
+  w_vf:     { exact: 32, partial4: 20, partial3: 12 }, // Viertelfinale
+  w_hf:     { exact: 55, partial4: 32, partial3: 16 }, // Halbfinale
+  w_finale: { exact: 100, partial4: 50, partial3: 20 } // Finale
+};
+const GROUP_POINTS = { exact: 5, partial4: 4, partial3: 3 };
+function getRoundPoints(weekId) { return ROUND_POINTS[weekId] || GROUP_POINTS; }
+
+function calcPoints(tip, result, weekId) {
   if (tip.home==='' || tip.away==='' || tip.home==null || tip.away==null) return null;
   if (result.home==null || result.away==null) return null;
   const th = parseInt(tip.home), ta = parseInt(tip.away);
   const rh = parseInt(result.home), ra = parseInt(result.away);
-  if (th === rh && ta === ra) return { pts: 5, label: 'exact' };
+  const pts = getRoundPoints(weekId);
+  if (th === rh && ta === ra) return { pts: pts.exact, label: 'exact' };
   const tipOut = th > ta ? 'H' : th < ta ? 'A' : 'D';
   const resOut = rh > ra ? 'H' : rh < ra ? 'A' : 'D';
   if (tipOut === resOut) {
-    let pts = (th === rh || ta === ra) ? 4 : 3;
-    return { pts, label: 'partial' };
+    const p = (th === rh || ta === ra) ? pts.partial4 : pts.partial3;
+    return { pts: p, label: 'partial' };
   }
   return { pts: 0, label: 'wrong' };
 }
@@ -585,7 +572,7 @@ function getPlayerTotalPoints(player, weekId) {
     const results = state.results[week.id] || [];
     tips.forEach((t, i) => {
       const r = results[i];
-      if (r) { const p = calcPoints(t, r); if (p) { total += p.pts; if (p.label==='exact') exact++; } }
+      if (r) { const p = calcPoints(t, r, week.id); if (p) { total += p.pts; if (p.label==='exact') exact++; } }
     });
   });
   return { total, exact };
@@ -624,11 +611,24 @@ function renderRanking() {
   });
   html += '</tbody></table>';
 
-  html += `<div style="background:var(--dark-2);border:1px solid var(--dark-4);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-muted);margin-bottom:20px;">
-    <strong style="color:var(--text)">Punktesystem:</strong> &nbsp;
+  html += `<div style="background:var(--dark-2);border:1px solid var(--dark-4);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-muted);margin-bottom:10px;">
+    <strong style="color:var(--text)">Punktesystem (Gruppenphase):</strong> &nbsp;
     Exaktes Ergebnis = <strong style="color:#003366">5 Punkte</strong> &nbsp;|&nbsp;
     Richtiger Ausgang + ein korrektes Tor = <strong style="color:#003366">4 Punkte</strong> &nbsp;|&nbsp;
     Richtiger Ausgang = <strong style="color:#003366">3 Punkte</strong>
+  </div>`;
+  html += `<div style="background:rgba(184,134,11,0.08);border:1px solid rgba(184,134,11,0.3);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+  <strong style="color:var(--text);display:block;margin-bottom:8px;"> K.O.-Phase – steigende Punktwerte:</strong>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr style="color:var(--text-muted);">
+        <td style="padding:3px 8px 3px 0;"></td><td style="padding:3px 8px;text-align:right;">Exakt</td><td style="padding:3px 8px;text-align:right;">+1 Tor</td><td style="padding:3px 0 3px 8px;text-align:right;">Ausgang</td>
+      </tr>
+      <tr><td style="padding:3px 8px 3px 0;">Sechzehntelfinale</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">10</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">7</td><td style="padding:3px 0 3px 8px;text-align:right;color:#B8860B;font-weight:600;">5</td></tr>
+      <tr><td style="padding:3px 8px 3px 0;">Achtelfinale</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">18</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">12</td><td style="padding:3px 0 3px 8px;text-align:right;color:#B8860B;font-weight:600;">8</td></tr>
+      <tr><td style="padding:3px 8px 3px 0;">Viertelfinale</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">32</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">20</td><td style="padding:3px 0 3px 8px;text-align:right;color:#B8860B;font-weight:600;">12</td></tr>
+      <tr><td style="padding:3px 8px 3px 0;">Halbfinale</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">55</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">32</td><td style="padding:3px 0 3px 8px;text-align:right;color:#B8860B;font-weight:600;">16</td></tr>
+      <tr><td style="padding:3px 8px 3px 0;">Finale</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">100</td><td style="padding:3px 8px;text-align:right;color:#B8860B;font-weight:600;">50</td><td style="padding:3px 0 3px 8px;text-align:right;color:#B8860B;font-weight:600;">20</td></tr>
+    </table>
   </div>`;
 
   // Büro-Wertung
@@ -687,7 +687,7 @@ function renderTipsOverview() {
       if (t && (t.home !== '' && t.away !== '')) {
         scoreLabel = `${t.home} : ${t.away}`;
         if (r && r.home != null) {
-          const p = calcPoints(t, r);
+          const p = calcPoints(t, r, weekId);
           if (p) { weekPts += p.pts; cls = p.label; }
         }
       }
@@ -749,17 +749,3 @@ async function init() {
 }
 
 init();
-let lastScroll = 0;
-
-window.addEventListener("scroll", () => {
-  const header = document.querySelector("header");
-  const current = window.pageYOffset;
-
-  if(current > lastScroll && current > 100){
-    header.classList.add("hide");
-  } else {
-    header.classList.remove("hide");
-  }   
-
-  lastScroll = current;
-});
