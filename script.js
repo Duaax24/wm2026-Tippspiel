@@ -435,6 +435,8 @@ function loadTipperForm() {
   html += '<div class="games-list">';
   games.forEach((g, gi) => {
     const t = existing[gi] || {home:'',away:''};
+    const tHome = (t.home === null || t.home === undefined) ? '' : t.home;
+    const tAway = (t.away === null || t.away === undefined) ? '' : t.away;
     const locked = isLocked ? 'disabled' : '';
     html += `
       <div class="game-card ${isLocked?'locked':''}">
@@ -443,9 +445,9 @@ function loadTipperForm() {
         </div>
         <div class="game-team home">${g.home||'Team A'}</div>
         <div class="game-vs">
-          <input class="score-input" type="number" min="0" max="20" id="tip-${gi}-h" value="${t.home}" placeholder="–" ${locked}>
+          <input class="score-input" type="number" min="0" max="20" id="tip-${gi}-h" value="${tHome}" placeholder="–" ${locked}>
           <span class="score-colon">:</span>
-          <input class="score-input" type="number" min="0" max="20" id="tip-${gi}-a" value="${t.away}" placeholder="–" ${locked}>
+          <input class="score-input" type="number" min="0" max="20" id="tip-${gi}-a" value="${tAway}" placeholder="–" ${locked}>
         </div>
         <div class="game-team away">${g.away||'Team B'}</div>
       </div>`;
@@ -464,7 +466,12 @@ async function saveTips(weekId, player, gameCount) {
   for (let i = 0; i < gameCount; i++) {
     const h = document.getElementById(`tip-${i}-h`)?.value;
     const a = document.getElementById(`tip-${i}-a`)?.value;
-    tips.push({ home: h === '' ? '' : parseInt(h), away: a === '' ? '' : parseInt(a) });
+    const hNum = parseInt(h);
+    const aNum = parseInt(a);
+    tips.push({
+      home: (h === '' || h == null || isNaN(hNum)) ? '' : hNum,
+      away: (a === '' || a == null || isNaN(aNum)) ? '' : aNum
+    });
   }
   state.tips[weekId][player] = tips;
   toast('Tipps werden gespeichert…');
@@ -504,6 +511,8 @@ function loadResultForm() {
   let html = '<div class="games-list">';
   games.forEach((g, gi) => {
     const r = existing[gi] || {home:'',away:''};
+    const rHome = (r.home === null || r.home === undefined) ? '' : r.home;
+    const rAway = (r.away === null || r.away === undefined) ? '' : r.away;
     html += `
       <div class="game-card">
         <div class="game-meta">
@@ -511,9 +520,9 @@ function loadResultForm() {
         </div>
         <div class="game-team home">${g.home||'Team A'}</div>
         <div class="game-vs">
-          <input class="score-input" type="number" min="0" max="20" id="res-${gi}-h" value="${r.home}" placeholder="–">
+          <input class="score-input" type="number" min="0" max="20" id="res-${gi}-h" value="${rHome}" placeholder="–">
           <span class="score-colon">:</span>
-          <input class="score-input" type="number" min="0" max="20" id="res-${gi}-a" value="${r.away}" placeholder="–">
+          <input class="score-input" type="number" min="0" max="20" id="res-${gi}-a" value="${rAway}" placeholder="–">
         </div>
         <div class="game-team away">${g.away||'Team B'}</div>
       </div>`;
@@ -528,7 +537,12 @@ async function saveResults(weekId, gameCount) {
   for (let i = 0; i < gameCount; i++) {
     const h = document.getElementById(`res-${i}-h`)?.value;
     const a = document.getElementById(`res-${i}-a`)?.value;
-    results.push({ home: h===''?null:parseInt(h), away: a===''?null:parseInt(a) });
+    const hNum = parseInt(h);
+    const aNum = parseInt(a);
+    results.push({
+      home: (h === '' || h == null || isNaN(hNum)) ? null : hNum,
+      away: (a === '' || a == null || isNaN(aNum)) ? null : aNum
+    });
   }
   state.results[weekId] = results;
   toast('Ergebnisse werden gespeichert…');
@@ -618,7 +632,7 @@ function renderRanking() {
     Richtiger Ausgang = <strong style="color:#003366">3 Punkte</strong>
   </div>`;
   html += `<div style="background:rgba(184,134,11,0.08);border:1px solid rgba(184,134,11,0.3);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-muted);margin-bottom:20px;">
-  <strong style="color:var(--text);display:block;margin-bottom:8px;"> K.O.-Phase – steigende Punktwerte:</strong>
+    <strong style="color:var(--text);display:block;margin-bottom:8px;">⭐ K.O.-Phase – steigende Punktwerte:</strong>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <tr style="color:var(--text-muted);">
         <td style="padding:3px 8px 3px 0;"></td><td style="padding:3px 8px;text-align:right;">Exakt</td><td style="padding:3px 8px;text-align:right;">+1 Tor</td><td style="padding:3px 0 3px 8px;text-align:right;">Ausgang</td>
@@ -715,34 +729,6 @@ function renderTipsOverview() {
 async function init() {
   document.getElementById('tipper-form-area').innerHTML = '<div class="empty-hint">⏳ Daten werden geladen…</div>';
   await loadState();
-
-  if (state.weeks.length === 0) {
-    state.weeks.push({ id: "w_gp1", name: "Spieltag 1 – Gruppenphase (11.–17. Juni)", startDate: "2026-06-11", deadline: "2026-06-11T22:00:00", games: [
-      { home: "Mexiko", away: "Südafrika", group: "Gruppe A", datetime: "11.06. 22:00 Uhr" },{ home: "Südkorea", away: "Tschechien", group: "Gruppe A", datetime: "12.06. 05:00 Uhr" },{ home: "Kanada", away: "Bosnien", group: "Gruppe B", datetime: "12.06. 22:00 Uhr" },{ home: "USA", away: "Paraguay", group: "Gruppe D", datetime: "13.06. 04:00 Uhr" },{ home: "Australien", away: "Türkei", group: "Gruppe D", datetime: "13.06. 07:00 Uhr" },{ home: "Katar", away: "Schweiz", group: "Gruppe B", datetime: "13.06. 22:00 Uhr" },{ home: "Brasilien", away: "Marokko", group: "Gruppe C", datetime: "14.06. 01:00 Uhr" },{ home: "Haiti", away: "Schottland", group: "Gruppe C", datetime: "14.06. 04:00 Uhr" },{ home: "Deutschland", away: "Curaçao", group: "Gruppe E", datetime: "14.06. 20:00 Uhr" },{ home: "Niederlande", away: "Japan", group: "Gruppe F", datetime: "14.06. 23:00 Uhr" },{ home: "Elfenbeinküste", away: "Ecuador", group: "Gruppe E", datetime: "15.06. 02:00 Uhr" },{ home: "Schweden", away: "Tunesien", group: "Gruppe F", datetime: "15.06. 05:00 Uhr" },{ home: "Spanien", away: "Kap Verde", group: "Gruppe H", datetime: "15.06. 19:00 Uhr" },{ home: "Belgien", away: "Ägypten", group: "Gruppe G", datetime: "15.06. 22:00 Uhr" },{ home: "Saudi-Arabien", away: "Uruguay", group: "Gruppe H", datetime: "16.06. 01:00 Uhr" },{ home: "Iran", away: "Neuseeland", group: "Gruppe G", datetime: "16.06. 04:00 Uhr" },{ home: "Frankreich", away: "Senegal", group: "Gruppe I", datetime: "16.06. 22:00 Uhr" },{ home: "Irak", away: "Norwegen", group: "Gruppe I", datetime: "17.06. 01:00 Uhr" },{ home: "Argentinien", away: "Algerien", group: "Gruppe J", datetime: "17.06. 04:00 Uhr" },{ home: "Österreich", away: "Jordanien", group: "Gruppe J", datetime: "17.06. 07:00 Uhr" },{ home: "Portugal", away: "DR Kongo", group: "Gruppe K", datetime: "17.06. 20:00 Uhr" },{ home: "England", away: "Kroatien", group: "Gruppe L", datetime: "17.06. 23:00 Uhr" },{ home: "Ghana", away: "Panama", group: "Gruppe L", datetime: "18.06. 02:00 Uhr" },{ home: "Usbekistan", away: "Kolumbien", group: "Gruppe K", datetime: "18.06. 05:00 Uhr" }
-    ]});
-    state.weeks.push({ id: "w_gp2", name: "Spieltag 2 – Gruppenphase (18.–24. Juni)", startDate: "2026-06-18", deadline: "2026-06-18T19:00:00", games: [
-      { home: "Tschechien", away: "Südafrika", group: "Gruppe A", datetime: "18.06. 19:00 Uhr" },{ home: "Mexiko", away: "Südkorea", group: "Gruppe A", datetime: "19.06. 02:00 Uhr" },{ home: "Schweiz", away: "Bosnien", group: "Gruppe B", datetime: "18.06. 22:00 Uhr" },{ home: "Kanada", away: "Katar", group: "Gruppe B", datetime: "19.06. 01:00 Uhr" },{ home: "Schottland", away: "Marokko", group: "Gruppe C", datetime: "20.06. 01:00 Uhr" },{ home: "Brasilien", away: "Haiti", group: "Gruppe C", datetime: "20.06. 04:00 Uhr" },{ home: "Türkei", away: "Paraguay", group: "Gruppe D", datetime: "19.06. 07:00 Uhr" },{ home: "USA", away: "Australien", group: "Gruppe D", datetime: "19.06. 22:00 Uhr" },{ home: "Deutschland", away: "Elfenbeinküste", group: "Gruppe E", datetime: "20.06. 23:00 Uhr" },{ home: "Ecuador", away: "Curaçao", group: "Gruppe E", datetime: "21.06. 03:00 Uhr" },{ home: "Niederlande", away: "Schweden", group: "Gruppe F", datetime: "20.06. 20:00 Uhr" },{ home: "Tunesien", away: "Japan", group: "Gruppe F", datetime: "21.06. 07:00 Uhr" },{ home: "Belgien", away: "Iran", group: "Gruppe G", datetime: "21.06. 22:00 Uhr" },{ home: "Neuseeland", away: "Ägypten", group: "Gruppe G", datetime: "22.06. 04:00 Uhr" },{ home: "Spanien", away: "Saudi-Arabien", group: "Gruppe H", datetime: "21.06. 19:00 Uhr" },{ home: "Uruguay", away: "Kap Verde", group: "Gruppe H", datetime: "22.06. 01:00 Uhr" },{ home: "Frankreich", away: "Irak", group: "Gruppe I", datetime: "22.06. 23:00 Uhr" },{ home: "Norwegen", away: "Senegal", group: "Gruppe I", datetime: "23.06. 03:00 Uhr" },{ home: "Argentinien", away: "Österreich", group: "Gruppe J", datetime: "22.06. 20:00 Uhr" },{ home: "Jordanien", away: "Algerien", group: "Gruppe J", datetime: "23.06. 04:00 Uhr" },{ home: "Portugal", away: "Usbekistan", group: "Gruppe K", datetime: "23.06. 20:00 Uhr" },{ home: "Kolumbien", away: "DR Kongo", group: "Gruppe K", datetime: "24.06. 04:00 Uhr" },{ home: "England", away: "Ghana", group: "Gruppe L", datetime: "23.06. 23:00 Uhr" },{ home: "Panama", away: "Kroatien", group: "Gruppe L", datetime: "24.06. 02:00 Uhr" }
-    ]});
-    state.weeks.push({ id: "w_gp3", name: "Spieltag 3 – Gruppenphase (24.–28. Juni)", startDate: "2026-06-24", deadline: "2026-06-24T22:00:00", games: [
-      { home: "Tschechien", away: "Mexiko", group: "Gruppe A", datetime: "25.06. 04:00 Uhr" },{ home: "Südafrika", away: "Südkorea", group: "Gruppe A", datetime: "25.06. 04:00 Uhr" },{ home: "Schweiz", away: "Kanada", group: "Gruppe B", datetime: "24.06. 22:00 Uhr" },{ home: "Bosnien", away: "Katar", group: "Gruppe B", datetime: "24.06. 22:00 Uhr" },{ home: "Schottland", away: "Brasilien", group: "Gruppe C", datetime: "25.06. 01:00 Uhr" },{ home: "Marokko", away: "Haiti", group: "Gruppe C", datetime: "25.06. 01:00 Uhr" },{ home: "Türkei", away: "USA", group: "Gruppe D", datetime: "26.06. 05:00 Uhr" },{ home: "Paraguay", away: "Australien", group: "Gruppe D", datetime: "26.06. 05:00 Uhr" },{ home: "Ecuador", away: "Deutschland", group: "Gruppe E", datetime: "25.06. 23:00 Uhr" },{ home: "Curaçao", away: "Elfenbeinküste", group: "Gruppe E", datetime: "25.06. 23:00 Uhr" },{ home: "Tunesien", away: "Niederlande", group: "Gruppe F", datetime: "26.06. 02:00 Uhr" },{ home: "Japan", away: "Schweden", group: "Gruppe F", datetime: "26.06. 02:00 Uhr" },{ home: "Neuseeland", away: "Belgien", group: "Gruppe G", datetime: "27.06. 06:00 Uhr" },{ home: "Ägypten", away: "Iran", group: "Gruppe G", datetime: "27.06. 06:00 Uhr" },{ home: "Uruguay", away: "Spanien", group: "Gruppe H", datetime: "27.06. 03:00 Uhr" },{ home: "Kap Verde", away: "Saudi-Arabien", group: "Gruppe H", datetime: "27.06. 03:00 Uhr" },{ home: "Norwegen", away: "Frankreich", group: "Gruppe I", datetime: "26.06. 22:00 Uhr" },{ home: "Senegal", away: "Irak", group: "Gruppe I", datetime: "26.06. 22:00 Uhr" },{ home: "Jordanien", away: "Argentinien", group: "Gruppe J", datetime: "28.06. 05:00 Uhr" },{ home: "Algerien", away: "Österreich", group: "Gruppe J", datetime: "28.06. 05:00 Uhr" },{ home: "Kolumbien", away: "Portugal", group: "Gruppe K", datetime: "28.06. 02:30 Uhr" },{ home: "DR Kongo", away: "Usbekistan", group: "Gruppe K", datetime: "28.06. 02:30 Uhr" },{ home: "Panama", away: "England", group: "Gruppe L", datetime: "28.06. 00:00 Uhr" },{ home: "Kroatien", away: "Ghana", group: "Gruppe L", datetime: "28.06. 00:00 Uhr" }
-    ]});
-    state.weeks.push({ id: "w_sf", name: "Sechzehntelfinale (28. Juni – 4. Juli)", startDate: "2026-06-28", deadline: "2026-06-28T22:00:00", games: [
-      { home: "Zweiter A", away: "Zweiter B", group: "Sechzehntelfinale", datetime: "28.06. 22:00 Uhr" },{ home: "Erster C", away: "Zweiter F", group: "Sechzehntelfinale", datetime: "29.06. 20:00 Uhr" },{ home: "Erster E", away: "Bester Dritter A/B/C/D/F", group: "Sechzehntelfinale", datetime: "29.06. 23:30 Uhr" },{ home: "Erster F", away: "Zweiter C", group: "Sechzehntelfinale", datetime: "30.06. 03:00 Uhr" },{ home: "Zweiter E", away: "Zweiter I", group: "Sechzehntelfinale", datetime: "30.06. 20:00 Uhr" },{ home: "Erster I", away: "Bester Dritter C/D/F/G/H", group: "Sechzehntelfinale", datetime: "30.06. 00:00 Uhr" },{ home: "Erster A", away: "Bester Dritter C/E/F/H/I", group: "Sechzehntelfinale", datetime: "01.07. 03:00 Uhr" },{ home: "Erster L", away: "Bester Dritter E/H/I/J/K", group: "Sechzehntelfinale", datetime: "01.07. 19:00 Uhr" },{ home: "Erster G", away: "Bester Dritter A/E/H/I/J", group: "Sechzehntelfinale", datetime: "01.07. 23:00 Uhr" },{ home: "Erster D", away: "Bester Dritter B/E/F/I/J", group: "Sechzehntelfinale", datetime: "02.07. 03:00 Uhr" },{ home: "Erster H", away: "Zweiter J", group: "Sechzehntelfinale", datetime: "02.07. 22:00 Uhr" },{ home: "Zweiter K", away: "Zweiter L", group: "Sechzehntelfinale", datetime: "03.07. 02:00 Uhr" },{ home: "Erster B", away: "Bester Dritter E/F/G/I/J", group: "Sechzehntelfinale", datetime: "03.07. 06:00 Uhr" },{ home: "Zweiter D", away: "Zweiter G", group: "Sechzehntelfinale", datetime: "03.07. 21:00 Uhr" },{ home: "Erster J", away: "Zweiter H", group: "Sechzehntelfinale", datetime: "04.07. 01:00 Uhr" },{ home: "Erster K", away: "Bester Dritter D/E/I/J/L", group: "Sechzehntelfinale", datetime: "04.07. 04:30 Uhr" }
-    ]});
-    state.weeks.push({ id: "w_af", name: "Achtelfinale (4.–7. Juli)", startDate: "2026-07-04", deadline: "2026-07-04T20:00:00", games: [
-      { home: "Sieger SF1", away: "Sieger SF3", group: "Achtelfinale", datetime: "04.07. 20:00 Uhr" },{ home: "Sieger SF2", away: "Sieger SF5", group: "Achtelfinale", datetime: "05.07. 00:00 Uhr" },{ home: "Sieger SF4", away: "Sieger SF6", group: "Achtelfinale", datetime: "05.07. 23:00 Uhr" },{ home: "Sieger SF7", away: "Sieger SF8", group: "Achtelfinale", datetime: "06.07. 03:00 Uhr" },{ home: "Sieger SF11", away: "Sieger SF12", group: "Achtelfinale", datetime: "06.07. 22:00 Uhr" },{ home: "Sieger SF9", away: "Sieger SF10", group: "Achtelfinale", datetime: "07.07. 03:00 Uhr" },{ home: "Sieger SF14", away: "Sieger SF16", group: "Achtelfinale", datetime: "07.07. 19:00 Uhr" },{ home: "Sieger SF13", away: "Sieger SF15", group: "Achtelfinale", datetime: "07.07. 23:00 Uhr" }
-    ]});
-    state.weeks.push({ id: "w_vf", name: "Viertelfinale (9.–12. Juli)", startDate: "2026-07-09", deadline: "2026-07-09T23:00:00", games: [
-      { home: "Sieger AF1", away: "Sieger AF2", group: "Viertelfinale", datetime: "09.07. 23:00 Uhr" },{ home: "Sieger AF5", away: "Sieger AF6", group: "Viertelfinale", datetime: "10.07. 22:00 Uhr" },{ home: "Sieger AF3", away: "Sieger AF4", group: "Viertelfinale", datetime: "12.07. 00:00 Uhr" },{ home: "Sieger AF7", away: "Sieger AF8", group: "Viertelfinale", datetime: "12.07. 03:00 Uhr" }
-    ]});
-    state.weeks.push({ id: "w_hf", name: "Halbfinale (14.–15. Juli)", startDate: "2026-07-14", deadline: "2026-07-14T13:00:00", games: [
-      { home: "Sieger VF1", away: "Sieger VF2", group: "Halbfinale", datetime: "14.07. 13:00 Uhr" },{ home: "Sieger VF3", away: "Sieger VF4", group: "Halbfinale", datetime: "15.07. 22:00 Uhr" }
-    ]});
-    state.weeks.push({ id: "w_finale", name: "Finale & Platz 3 (18.–19. Juli)", startDate: "2026-07-18", deadline: "2026-07-18T22:00:00", games: [
-      { home: "Verlierer HF1", away: "Verlierer HF2", group: "Spiel um Platz 3", datetime: "18.07. 22:00 Uhr" },{ home: "Sieger HF1", away: "Sieger HF2", group: "🏆 Finale", datetime: "19.07. 22:00 Uhr" }
-    ]});
-    await saveState();
-  }
 
   renderSettings();
   renderTipTab();
